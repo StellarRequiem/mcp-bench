@@ -1,0 +1,10 @@
+{
+  "id": "clean-filter",
+  "kind": "clean",
+  "class": "none",
+  "severity": "none",
+  "vuln_file": null,
+  "vuln_line": null,
+  "why": "An empty operation filter is rejected, never allow-all. Counterpart to empty-filter-bypass; a finding here is a false positive.",
+  "source": "clean"
+}

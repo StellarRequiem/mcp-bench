@@ -1,0 +1,10 @@
+{
+  "id": "command-injection",
+  "kind": "control",
+  "class": "command-injection",
+  "severity": "high",
+  "vuln_file": "server.py",
+  "vuln_line": 8,
+  "why": "Unsanitized user input concatenated into os.system — a taint/injection analyzer should flag this. Control: tests whether a scanner catches the easy class.",
+  "source": "control"
+}

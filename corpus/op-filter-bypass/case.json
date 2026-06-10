@@ -1,0 +1,10 @@
+{
+  "id": "op-filter-bypass",
+  "kind": "authz-logic",
+  "class": "operation-filter-bypass",
+  "severity": "high",
+  "vuln_file": "server.py",
+  "vuln_line": 11,
+  "why": "item_id is substituted into the request path unencoded, so a crafted id traverses out of the allowed resource and escapes the operation filter (fastapi_mcp-001 class).",
+  "source": "generalized from a real responsibly-confirmed finding"
+}

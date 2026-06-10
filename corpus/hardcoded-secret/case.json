@@ -1,0 +1,10 @@
+{
+  "id": "hardcoded-secret",
+  "kind": "control",
+  "class": "hardcoded-secret",
+  "severity": "medium",
+  "vuln_file": "server.py",
+  "vuln_line": 5,
+  "why": "A live API credential hardcoded in source — a competent secrets analyzer should flag this. Control: tests whether a scanner catches the easy class.",
+  "source": "control"
+}

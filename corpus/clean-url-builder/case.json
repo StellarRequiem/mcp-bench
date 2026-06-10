@@ -1,0 +1,10 @@
+{
+  "id": "clean-url-builder",
+  "kind": "clean",
+  "class": "none",
+  "severity": "none",
+  "vuln_file": null,
+  "vuln_line": null,
+  "why": "Path params are percent-encoded before substitution; the resource filter holds. A finding here is a false positive.",
+  "source": "patched counterpart of op-filter-bypass"
+}

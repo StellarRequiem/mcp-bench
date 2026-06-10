@@ -1,0 +1,10 @@
+{
+  "id": "empty-filter-bypass",
+  "kind": "authz-logic",
+  "class": "empty-filter-bypass",
+  "severity": "high",
+  "vuln_file": "server.py",
+  "vuln_line": 11,
+  "why": "An empty operation allowlist degrades to allow-all, silently exposing every operation incl. privileged ones (fastapi_mcp-003 class).",
+  "source": "generalized from a real responsibly-confirmed finding"
+}

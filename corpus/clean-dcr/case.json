@@ -1,0 +1,10 @@
+{
+  "id": "clean-dcr",
+  "kind": "clean",
+  "class": "none",
+  "severity": "none",
+  "vuln_file": null,
+  "vuln_line": null,
+  "why": "Issues a public client; no confidential client_secret is returned. Counterpart to fake-dcr-secret-leak; a finding here is a false positive.",
+  "source": "clean"
+}

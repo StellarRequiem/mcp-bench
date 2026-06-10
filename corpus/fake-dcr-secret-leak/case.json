@@ -1,0 +1,10 @@
+{
+  "id": "fake-dcr-secret-leak",
+  "kind": "authz-logic",
+  "class": "fake-dcr-secret-leak",
+  "severity": "high",
+  "vuln_file": "server.py",
+  "vuln_line": 10,
+  "why": "The DCR /register endpoint returns a confidential client_secret to an unauthenticated caller (fastapi_mcp-002 class) — confidential-client credential exposure.",
+  "source": "generalized from a real responsibly-confirmed finding"
+}
