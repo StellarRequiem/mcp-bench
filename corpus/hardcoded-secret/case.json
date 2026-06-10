@@ -4,7 +4,7 @@
   "class": "hardcoded-secret",
   "severity": "medium",
   "vuln_file": "server.py",
-  "vuln_line": 5,
-  "why": "A live API credential hardcoded in source — a competent secrets analyzer should flag this. Control: tests whether a scanner catches the easy class.",
+  "vuln_line": 6,
+  "why": "Hardcoded AWS credentials (access-key shape) committed to source — a competent secrets analyzer should flag this. Control: tests whether a scanner catches the easy class.",
   "source": "control"
 }

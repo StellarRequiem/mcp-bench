@@ -4,7 +4,7 @@
   "class": "command-injection",
   "severity": "high",
   "vuln_file": "server.py",
-  "vuln_line": 8,
-  "why": "Unsanitized user input concatenated into os.system — a taint/injection analyzer should flag this. Control: tests whether a scanner catches the easy class.",
+  "vuln_line": 10,
+  "why": "Unsanitized user input passed to subprocess.call(cmd, shell=True) — a taint/injection analyzer should flag this. Control: tests whether a scanner catches the easy class.",
   "source": "control"
 }

@@ -1,9 +1,11 @@
-"""Minimal MCP server with a hardcoded API credential in source — a CONTROL bug a competent source
-scanner SHOULD catch (its secrets analyzer). Included so the benchmark can show whether a scanner
-catches the easy class while missing the authorization-logic class. Not an authz-logic bug."""
+"""Minimal MCP server with hardcoded cloud credentials in source — a CONTROL bug a competent secrets
+scanner SHOULD catch (its secrets analyzer). The keys below are SYNTHETIC benchmark fixtures matching
+the AWS key SHAPE, not real credentials. Not an authz-logic bug; included to baseline scanner capability."""
 
-API_KEY = "sk-live-FAKEbenchmarkfixtureNOTAREALKEY00"   # CONTROL: secret-shaped fixture (synthetic) committed to source
+# CONTROL: hardcoded AWS credentials committed to source (synthetic fixtures, NOT real)
+AWS_ACCESS_KEY_ID = "AKIABENCHFIXTUREKEY0"
+AWS_SECRET_ACCESS_KEY = "wJalrBENCHFIXTUREbPxRfiCYbenchKEYfixture0"
 
 
 def call_upstream(payload: dict) -> dict:
-    return {"authorization": "Bearer " + API_KEY, "payload": payload}
+    return {"aws_access_key_id": AWS_ACCESS_KEY_ID, "payload": payload}
