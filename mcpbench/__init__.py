@@ -76,7 +76,9 @@ def semgrep_scan(case_dir, name="semgrep"):
     if not src.is_file():
         return []
     try:
-        out = subprocess.run(["semgrep", "scan", "--sarif", "--quiet", "--config", "auto", str(src)],
+        # concrete public rule-packs (no token needed); `auto` loads nothing without a Semgrep account
+        out = subprocess.run(["semgrep", "scan", "--sarif", "--quiet",
+                              "--config", "p/python", "--config", "p/secrets", str(src)],
                              capture_output=True, text=True, timeout=300)
         return parse_sarif(json.loads(out.stdout or "{}"), case_dir.name, name)
     except Exception:
