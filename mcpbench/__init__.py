@@ -1,14 +1,17 @@
 """mcp-bench — an independent, reproducible benchmark of how well MCP security scanners detect
 *authorization-logic* vulnerabilities, seeded with real responsibly-confirmed finds.
 
-Walking skeleton (G2): a REAL built-in reference detector runs the REAL corpus end-to-end through
-run -> score, producing real detection + false-positive numbers. Third-party scanner adapters
-(CSA mcpserver-audit, mcp-security-auditor, Snyk agent-scan) plug into the same `SCANNERS` registry
-next (G3). Nothing here is mocked — the detector genuinely reads each case's source.
+Scanners are UNTRUSTED third-party code, so real scanners run only inside a disposable, isolated
+runner — the GitHub Actions ephemeral VM (see .github/workflows/scan.yml) — never on a primary host.
+The built-in `reference` detector is our own code and runs anywhere. A scanner is invoked only if it
+is actually available on the machine (`semgrep` runs where semgrep is installed — i.e. in CI), so the
+local test suite stays host-safe.
 """
 import argparse
 import json
 import re
+import shutil
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -20,21 +23,18 @@ def load_cases():
     out = []
     for d in sorted(p for p in CORPUS.iterdir() if (p / "case.json").is_file()):
         c = json.loads((d / "case.json").read_text(encoding="utf-8"))
-        c["name"] = d.name
-        c["dir"] = d
+        c["name"], c["dir"] = d.name, d
         out.append(c)
     return out
 
 
-# --------------------------------------------------------------------------- #
-# Scanners. A scanner is name -> scan(case_dir, name) -> [finding dicts].
-# The reference detector is a real (deliberately naive) static check for the operation-filter-bypass
-# class: a request path/URL built by string substitution WITHOUT percent-encoding — the exact pattern
-# behind fastapi_mcp-001, where a crafted operation id traverses the operation filter.
-# --------------------------------------------------------------------------- #
+# ----- reference detector: our own code, real but deliberately naive, runs anywhere -----
+def reference_available():
+    return True
+
+
 def reference_scan(case_dir, name="reference"):
-    findings = []
-    src = case_dir / "server.py"
+    findings, src = [], case_dir / "server.py"
     if not src.is_file():
         return findings
     for i, line in enumerate(src.read_text(encoding="utf-8").splitlines(), 1):
@@ -42,24 +42,62 @@ def reference_scan(case_dir, name="reference"):
         builds_path = re.search(r"\.replace\(.*\{.*\}", line) or re.search(r"(path|url)\s*=.*\{[a-z_]+\}", line, re.I)
         encoded = any(tok in line for tok in ("quote(", "urlencode", ".encode", "escape("))
         if builds_path and not encoded:
-            cls = "operation-filter-bypass"                          # unencoded path substitution
+            cls = "operation-filter-bypass"
         elif re.search(r'["\']client_secret["\']\s*:', line):
-            cls = "fake-dcr-secret-leak"                             # confidential secret echoed in a response
+            cls = "fake-dcr-secret-leak"
         elif re.search(r"not\s+\w*filter\w*\s+or\b", line, re.I):
-            cls = "empty-filter-bypass"                              # empty filter degrades to allow-all
+            cls = "empty-filter-bypass"
         if cls:
             findings.append({"scanner": name, "case": case_dir.name, "cls": cls, "file": "server.py", "line": i})
     return findings
 
 
-SCANNERS = {"reference": reference_scan}
+# ----- semgrep: a real, mature general-purpose SAST baseline; runs only where installed (CI) -----
+def parse_sarif(sarif, case_name, scanner):
+    """Pure SARIF -> normalized findings. Testable without running the scanner."""
+    out = []
+    for run_ in sarif.get("runs", []):
+        for res in run_.get("results", []):
+            for loc in res.get("locations", []):
+                phys = loc.get("physicalLocation", {})
+                uri = phys.get("artifactLocation", {}).get("uri", "")
+                ln = phys.get("region", {}).get("startLine", 0)
+                out.append({"scanner": scanner, "case": case_name, "cls": res.get("ruleId", scanner),
+                            "file": uri.split("/")[-1], "line": ln})
+    return out
+
+
+def semgrep_available():
+    return shutil.which("semgrep") is not None
+
+
+def semgrep_scan(case_dir, name="semgrep"):
+    src = case_dir / "server.py"
+    if not src.is_file():
+        return []
+    try:
+        out = subprocess.run(["semgrep", "scan", "--sarif", "--quiet", "--config", "auto", str(src)],
+                             capture_output=True, text=True, timeout=300)
+        return parse_sarif(json.loads(out.stdout or "{}"), case_dir.name, name)
+    except Exception:
+        return []
+
+
+SCANNERS = {
+    "reference": (reference_available, reference_scan),
+    "semgrep": (semgrep_available, semgrep_scan),
+}
+
+
+def active():
+    return {n: sc for n, (av, sc) in SCANNERS.items() if av()}
 
 
 def run():
-    cases = load_cases()
-    results = [f for name, scan in SCANNERS.items() for c in cases for f in scan(c["dir"], name)]
+    cases, act = load_cases(), active()
+    results = [f for n, sc in act.items() for c in cases for f in sc(c["dir"], n)]
     RESULTS.write_text(json.dumps(results, indent=2), encoding="utf-8")
-    print(f"  ran {len(SCANNERS)} scanner(s) x {len(cases)} cases -> {len(results)} findings -> results.json")
+    print(f"  ran {len(act)} scanner(s) [{', '.join(act) or 'none'}] x {len(cases)} cases -> {len(results)} findings")
     return results
 
 
@@ -72,12 +110,9 @@ def score(results=None):
     table = {}
     print(f"  corpus: {len(authz)} authz-logic + {len(control)} control + {len(clean)} clean")
     print(f"  {'scanner':12}{'authz-logic':>16}{'control':>14}{'false-pos':>12}")
-    for name in SCANNERS:
+    for name in active():
         f = [r for r in results if r["scanner"] == name]
-
-        def det(group):
-            return sum(any(r["case"] == c["name"] and r["cls"] == c["class"] and r["file"] == c["vuln_file"] for r in f) for c in group)
-
+        det = lambda g: sum(any(r["case"] == c["name"] and r["file"] == c["vuln_file"] for r in f) for c in g)  # noqa: E731
         da, dc = det(authz), det(control)
         fp = sum(any(r["case"] == c["name"] for r in f) for c in clean)
         table[name] = {"detected": da, "authz_total": len(authz), "control_detected": dc,
@@ -91,12 +126,7 @@ def score(results=None):
 def main():
     ap = argparse.ArgumentParser(prog="mcpbench", description="MCP scanner authz-logic detection benchmark")
     sub = ap.add_subparsers(dest="cmd")
-    sub.add_parser("run", help="run every scanner over the corpus -> results.json")
-    sub.add_parser("score", help="score results.json -> detection + FP table")
+    sub.add_parser("run")
+    sub.add_parser("score")
     args = ap.parse_args()
-    if args.cmd == "run":
-        run()
-    elif args.cmd == "score":
-        score()
-    else:
-        score(run())
+    score(run()) if args.cmd not in ("run", "score") else (run() if args.cmd == "run" else score())

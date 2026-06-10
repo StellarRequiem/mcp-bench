@@ -1,0 +1,27 @@
+name: scan
+# Runs the real scanner benchmark INSIDE the disposable GitHub Actions runner — untrusted scanners
+# execute here (fresh VM, torn down after the job), never on a developer host. This is the project's
+# isolation boundary.
+on:
+  workflow_dispatch:
+  push:
+    paths: ["corpus/**", "mcpbench/**", ".github/workflows/scan.yml"]
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install mcp-bench + scanner subjects (semgrep)
+        run: pip install -e . semgrep
+      - name: Run the benchmark (scanners execute in this ephemeral runner only)
+        run: mcpbench | tee benchmark.txt
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: |
+            results.json
+            benchmark.txt
