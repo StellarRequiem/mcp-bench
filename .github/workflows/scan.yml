@@ -16,6 +16,12 @@ jobs:
           python-version: "3.12"
       - name: Install mcp-bench + scanner subjects (semgrep)
         run: pip install -e . semgrep
+      - name: Diagnose — does semgrep detect the obvious control bug in this runner?
+        continue-on-error: true
+        run: |
+          semgrep --version
+          echo "--- semgrep p/python on the command-injection control (verbose) ---"
+          semgrep scan --config p/python corpus/command-injection/server.py; echo "exit=$?"
       - name: Run the benchmark (scanners execute in this ephemeral runner only)
         run: mcpbench | tee benchmark.txt
       - name: Upload results
