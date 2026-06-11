@@ -22,19 +22,6 @@ jobs:
           semgrep --version
           echo "--- semgrep p/python on the command-injection control (verbose) ---"
           semgrep scan --config p/python corpus/command-injection/server.py; echo "exit=$?"
-      - name: Install CodeQL CLI (the 3rd, independent deep-taint scanner)
-        run: |
-          curl -sL https://github.com/github/codeql-action/releases/latest/download/codeql-bundle-linux64.tar.gz -o /tmp/codeql.tar.gz
-          tar xzf /tmp/codeql.tar.gz -C /tmp
-          echo "/tmp/codeql" >> "$GITHUB_PATH"
-          /tmp/codeql/codeql --version | head -1
-      - name: Diagnose — does CodeQL build + detect the command-injection control?
-        continue-on-error: true
-        run: |
-          set -x
-          codeql database create /tmp/db --language=python --build-mode=none --source-root=corpus/command-injection --overwrite
-          codeql database analyze /tmp/db python-security-and-quality.qls --format=sarif-latest --output=/tmp/ci.sarif --threads=2
-          python3 -c "import json; d=json.load(open('/tmp/ci.sarif')); rs=d['runs'][0].get('results',[]); print('CodeQL findings on command-injection:', len(rs)); [print('  rule:', r.get('ruleId')) for r in rs]"
       - name: Run the benchmark (scanners execute in this ephemeral runner only)
         run: mcpbench | tee benchmark.txt
       - name: Upload results
