@@ -111,10 +111,38 @@ def bandit_scan(case_dir, name="bandit"):
         return []
 
 
+# ----- codeql: an independent DEEP-taint SAST (different engine entirely); runs only where installed (CI) -----
+def codeql_available():
+    return shutil.which("codeql") is not None
+
+
+def codeql_scan(case_dir, name="codeql"):
+    src = case_dir / "server.py"
+    if not src.is_file():
+        return []
+    import tempfile
+    try:
+        with tempfile.TemporaryDirectory() as td:
+            db = str(Path(td) / "db")
+            r1 = subprocess.run(["codeql", "database", "create", db, "--language=python",
+                                 f"--source-root={case_dir}", "--overwrite", "--quiet"],
+                                capture_output=True, text=True, timeout=600)
+            if r1.returncode != 0:
+                return []
+            out = str(Path(td) / "out.sarif")
+            subprocess.run(["codeql", "database", "analyze", db, "python-security-and-quality.qls",
+                            "--format=sarif-latest", f"--output={out}", "--quiet"],
+                           capture_output=True, text=True, timeout=600)
+            return parse_sarif(json.loads(Path(out).read_text(encoding="utf-8")), case_dir.name, name)
+    except Exception:
+        return []
+
+
 SCANNERS = {
     "reference": (reference_available, reference_scan),
     "semgrep": (semgrep_available, semgrep_scan),
     "bandit": (bandit_available, bandit_scan),
+    "codeql": (codeql_available, codeql_scan),
 }
 
 

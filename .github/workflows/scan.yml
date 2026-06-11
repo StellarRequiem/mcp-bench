@@ -22,6 +22,12 @@ jobs:
           semgrep --version
           echo "--- semgrep p/python on the command-injection control (verbose) ---"
           semgrep scan --config p/python corpus/command-injection/server.py; echo "exit=$?"
+      - name: Install CodeQL CLI (the 3rd, independent deep-taint scanner)
+        run: |
+          curl -sL https://github.com/github/codeql-action/releases/latest/download/codeql-bundle-linux64.tar.gz -o /tmp/codeql.tar.gz
+          tar xzf /tmp/codeql.tar.gz -C /tmp
+          echo "/tmp/codeql" >> "$GITHUB_PATH"
+          /tmp/codeql/codeql --version | head -1
       - name: Run the benchmark (scanners execute in this ephemeral runner only)
         run: mcpbench | tee benchmark.txt
       - name: Upload results
