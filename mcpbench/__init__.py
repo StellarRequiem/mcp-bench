@@ -85,9 +85,36 @@ def semgrep_scan(case_dir, name="semgrep"):
         return []
 
 
+# ----- bandit: a second mature general-purpose Python SAST baseline; runs only where installed (CI) -----
+def parse_bandit(report, case_name, scanner):
+    """Pure bandit-JSON -> normalized findings. Testable without running the scanner."""
+    out = []
+    for r in report.get("results", []):
+        out.append({"scanner": scanner, "case": case_name, "cls": r.get("test_id", scanner),
+                    "file": str(r.get("filename", "")).split("/")[-1], "line": r.get("line_number", 0)})
+    return out
+
+
+def bandit_available():
+    return shutil.which("bandit") is not None
+
+
+def bandit_scan(case_dir, name="bandit"):
+    src = case_dir / "server.py"
+    if not src.is_file():
+        return []
+    try:
+        out = subprocess.run(["bandit", "-f", "json", "-q", str(src)],
+                             capture_output=True, text=True, timeout=300)
+        return parse_bandit(json.loads(out.stdout or "{}"), case_dir.name, name)
+    except Exception:
+        return []
+
+
 SCANNERS = {
     "reference": (reference_available, reference_scan),
     "semgrep": (semgrep_available, semgrep_scan),
+    "bandit": (bandit_available, bandit_scan),
 }
 
 

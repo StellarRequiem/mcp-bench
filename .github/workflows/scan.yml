@@ -14,8 +14,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install mcp-bench + scanner subjects (semgrep)
-        run: pip install -e . semgrep
+      - name: Install mcp-bench + scanner subjects (semgrep, bandit)
+        run: pip install -e . semgrep bandit
       - name: Diagnose — does semgrep detect the obvious control bug in this runner?
         continue-on-error: true
         run: |
