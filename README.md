@@ -29,16 +29,20 @@ finds: operation-filter bypass, fake-DCR secret leak, empty-filter bypass) · 2 
 scanner *should* catch (hardcoded secret, command injection) · 3 clean negatives (per-class
 false-positive measurement).
 
-**Headline result** (semgrep 1.x, run in the disposable CI sandbox — see below):
+**Headline result** (semgrep + bandit, run in the disposable CI sandbox — see below):
 
 | scanner | authz-logic | control | false-pos |
 |---|---|---|---|
-| **semgrep** (general SAST) | **0/3 (0%)** | **2/2 (100%)** | 0/3 |
+| **semgrep** (general SAST) | **0/3 (0%)** | 2/2 (100%) | 0/3 |
+| **bandit** (general SAST) | **0/3 (0%)** | 2/2 (100%) | 1/3 |
 | reference (our authz-logic detector) | 3/3 (100%) | 0/2 (n/a — specialist) | 0/3 |
 
-> A mature general-purpose SAST **catches the easy/generic classes (controls 2/2) yet is blind to the
-> authorization-logic class (0/3)** — empirical support for the thesis, with **zero false-positives**.
-> The control 2/2 proves semgrep *works*, so its authz-logic miss is meaningful, not a setup artifact.
+> **Two independent mature general-purpose SASTs each catch the easy/generic classes (controls 2/2)
+> yet are blind to the authorization-logic class (0/3)** — empirical support for the thesis across
+> scanners, not a single-tool quirk. The control 2/2 proves they *work*, so the authz-logic miss is
+> meaningful, not a setup artifact. (bandit's 1 false-positive — a `B105` string-heuristic flagging an
+> OAuth `"none"` value near a token-named key in a *clean* case — is itself honest signal: general SAST
+> is noisier; we report it rather than hide it.)
 
 **Isolation:** scanners are untrusted third-party code, so they run **only inside a disposable sandbox
 — the GitHub Actions ephemeral runner (`.github/workflows/scan.yml`), never a developer host.** Local
