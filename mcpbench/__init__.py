@@ -125,7 +125,7 @@ def codeql_scan(case_dir, name="codeql"):
         with tempfile.TemporaryDirectory() as td:
             db = str(Path(td) / "db")
             r1 = subprocess.run(["codeql", "database", "create", db, "--language=python",
-                                 f"--source-root={case_dir}", "--overwrite", "--quiet"],
+                                 "--build-mode=none", f"--source-root={case_dir}", "--overwrite", "--quiet"],
                                 capture_output=True, text=True, timeout=600)
             if r1.returncode != 0:
                 return []
