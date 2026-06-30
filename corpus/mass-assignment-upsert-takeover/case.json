@@ -1,0 +1,10 @@
+{
+  "id": "mass-assignment-upsert-takeover",
+  "kind": "authz-logic",
+  "class": "mass-assignment-upsert-takeover",
+  "severity": "high",
+  "vuln_file": "server.py",
+  "vuln_line": 17,
+  "why": "The target row is resolved by a body-supplied id with no owner check, then every field in the body -- including the ownership column -- is written back (write-side broken authorization / mass assignment, CWE-915 + CWE-639). Generalized from a real, responsibly-confirmed finding -- no target named, no implementation details reused.",
+  "source": "generalized from a real responsibly-confirmed finding"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "bola-client-supplied-owner-key",
+  "kind": "authz-logic",
+  "class": "bola-client-supplied-owner-key",
+  "severity": "high",
+  "vuln_file": "server.py",
+  "vuln_line": 11,
+  "why": "A scoping key (user_id) is present, but it is taken verbatim from caller-supplied input rather than derived from an authenticated identity -- the filter exists syntactically but authorizes nothing (broken object-level authorization, CWE-639). A naive 'is there a filter' check passes this case; that gap is the point. Generalized from a real, responsibly-confirmed finding -- no target named, no implementation details reused.",
+  "source": "generalized from a real responsibly-confirmed finding"
+}

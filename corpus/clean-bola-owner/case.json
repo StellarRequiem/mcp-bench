@@ -1,0 +1,10 @@
+{
+  "id": "clean-bola-owner",
+  "kind": "clean",
+  "class": "none",
+  "severity": "none",
+  "vuln_file": null,
+  "vuln_line": null,
+  "why": "Both accessors filter by id AND owner. Counterpart to bola-missing-owner-filter; a finding here is a false positive.",
+  "source": "clean"
+}

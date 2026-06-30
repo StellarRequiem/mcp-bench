@@ -1,0 +1,10 @@
+{
+  "id": "clean-mass-assignment",
+  "kind": "clean",
+  "class": "none",
+  "severity": "none",
+  "vuln_file": null,
+  "vuln_line": null,
+  "why": "The target is resolved by id AND owner, and only an explicit field allowlist is ever written back -- the ownership column can never be touched by the request body. Counterpart to mass-assignment-upsert-takeover; a finding here is a false positive.",
+  "source": "clean"
+}
