@@ -1,0 +1,10 @@
+{
+  "id": "tool-list-call-divergence",
+  "kind": "authz-logic",
+  "class": "list-call-surface-divergence",
+  "severity": "high",
+  "vuln_file": "server.py",
+  "vuln_line": 11,
+  "why": "The advertised operation list and the dispatchable operation surface are pruned by the same function, but an empty include-filter short-circuits the prune (the `if filtered:` guard no-ops), leaving the un-pruned registry reachable through dispatch even though the advertised list correctly shows empty -- the advertised and executable surfaces silently diverge (CWE-285). Generalized from a real, responsibly-confirmed finding -- no target named.",
+  "source": "generalized from a real responsibly-confirmed finding"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "clean-list-call-divergence",
+  "kind": "clean",
+  "class": "none",
+  "severity": "none",
+  "vuln_file": null,
+  "vuln_line": null,
+  "why": "The prune always applies unconditionally, even when the filter is empty -- the advertised and dispatchable surfaces can never diverge. Counterpart to tool-list-call-divergence; a finding here is a false positive.",
+  "source": "clean"
+}

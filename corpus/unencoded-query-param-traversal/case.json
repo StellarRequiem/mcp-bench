@@ -1,0 +1,10 @@
+{
+  "id": "unencoded-query-param-traversal",
+  "kind": "authz-logic",
+  "class": "unencoded-interpolation-traversal",
+  "severity": "high",
+  "vuln_file": "server.py",
+  "vuln_line": 14,
+  "why": "Same unencoded-interpolation-into-a-path root cause as operation-filter-bypass (CWE-22), via f-string interpolation rather than .replace() substitution -- tests whether scanner detection generalizes across syntactically different but semantically equivalent code, or is narrowly pattern-matched to one AST shape. Generalized from a real, responsibly-confirmed finding -- no target named.",
+  "source": "generalized from a real responsibly-confirmed finding"
+}

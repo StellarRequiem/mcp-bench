@@ -50,9 +50,25 @@ class," reported as such, not silently inflated to 100% by hand-fitting a regex 
 | authz-logic | bola-missing-owner-filter | not yet |
 | authz-logic | bola-client-supplied-owner-key | not yet |
 | authz-logic | mass-assignment-upsert-takeover | not yet |
+| authz-logic | unencoded-interpolation-traversal | not yet (a generalization test, not a new class for the reference detector) |
+| authz-logic | guard-divergence-across-paths | yes, incidentally -- see note below the table |
+| authz-logic | list-call-surface-divergence | not yet |
+
+**Note on `guard-divergence-across-paths`:** this table originally predicted "not yet" before the
+first live run. The actual run shows the naive `operation-filter-bypass` regex (an unparameterized
+`\.replace\(.*\{.*\}` check with no canonical-encoding-function-name nearby) fires on this case's
+*actual* vulnerable line (`build_url_legacy`, the unencoded sibling) -- a correct detection, for the
+right reason. It also incidentally fires on the *safe* function's line, because that heuristic's
+"is it encoded?" check only recognizes `quote(`/`urlencode`/`.encode`/`escape(` by name and doesn't
+recognize the safe function's manual `.replace(".", "%2E")` percent-encoding as encoding at all. Both
+findings collapse into a single case-level "detected" verdict under the file-level scoring rule, so
+the case still passes correctly overall -- but the within-case false-positive-on-the-safe-line is a
+real, minor limitation of the reference detector's narrow encoding heuristic, reported here rather
+than fixed by editing the case (the case was not touched after this result was observed, per the
+anti-p-hacking commitments below).
 | control | hardcoded-secret | n/a (control, not authz-logic) |
 | control | command-injection | n/a |
-| clean | clean-filter / clean-dcr / clean-url-builder / clean-bola-owner / clean-mass-assignment | n/a |
+| clean | clean-filter / clean-dcr / clean-url-builder / clean-bola-owner / clean-mass-assignment / clean-list-call-divergence | n/a |
 
 ## Anti-p-hacking commitments
 

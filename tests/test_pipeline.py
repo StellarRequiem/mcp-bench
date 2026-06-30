@@ -36,15 +36,18 @@ def test_expanded_corpus_structure():
     with the right kind/class/file wiring, independent of whether any scanner (reference included)
     catches them yet."""
     cases = {c["id"]: c for c in load_cases()}
-    new_authz = ["bola-missing-owner-filter", "bola-client-supplied-owner-key", "mass-assignment-upsert-takeover"]
-    new_clean = ["clean-bola-owner", "clean-mass-assignment"]
+    new_authz = ["bola-missing-owner-filter", "bola-client-supplied-owner-key", "mass-assignment-upsert-takeover",
+                 "unencoded-query-param-traversal", "version-pinned-authz-divergence", "tool-list-call-divergence"]
+    new_clean = ["clean-bola-owner", "clean-mass-assignment", "clean-list-call-divergence"]
     for cid in new_authz:
         assert cases[cid]["kind"] == "authz-logic"
         assert cases[cid]["vuln_file"] == "server.py"
         assert (cases[cid]["dir"] / cases[cid]["vuln_file"]).is_file()
         assert "VULN" in (cases[cid]["dir"] / "server.py").read_text()
-        # disclosure floor: no target/finding-id naming in the new cases' rationale
+        # disclosure floor: no target/finding-id naming in the new cases' rationale (CVE numbers are
+        # exempt -- they're public identifiers, not new disclosures)
         assert "autogen" not in cases[cid]["why"].lower()
+        assert "fastapi_mcp-0" not in cases[cid]["why"].lower()
     for cid in new_clean:
         assert cases[cid]["kind"] == "clean"
         assert cases[cid]["vuln_file"] is None

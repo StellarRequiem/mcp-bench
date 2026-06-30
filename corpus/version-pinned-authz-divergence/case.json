@@ -1,0 +1,10 @@
+{
+  "id": "version-pinned-authz-divergence",
+  "kind": "authz-logic",
+  "class": "guard-divergence-across-paths",
+  "severity": "high",
+  "vuln_file": "server.py",
+  "vuln_line": 21,
+  "why": "An authorization/encoding guard exists on one code path (build_url_checked) but a structurally equivalent sibling path (build_url_legacy) skips it entirely -- the check and the dispatch logic have silently diverged (CWE-862). Modeled on the same root-cause shape as the publicly disclosed CVE-2026-32871 (an incomplete fix that guarded one path but not its sibling) -- a public CVE, safe to cite directly; not a new disclosure.",
+  "source": "modeled on the same shape as a publicly disclosed CVE"
+}
