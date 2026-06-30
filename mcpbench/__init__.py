@@ -19,6 +19,21 @@ CORPUS = ROOT / "corpus"
 RESULTS = ROOT / "results.json"
 
 
+def wilson_ci(successes, total, z=1.96):
+    """95% Wilson score interval for a detection rate -- the standard fix for how misleadingly tight a
+    raw n/N fraction looks at small N. 0/3 only actually bounds the true rate to roughly [0%, 56%]; a
+    headline percentage without this is an overclaim at this corpus size. Pure, no external deps."""
+    if total == 0:
+        return (0.0, 0.0)
+    p = successes / total
+    denom = 1 + z * z / total
+    center = p + z * z / (2 * total)
+    margin = z * ((p * (1 - p) / total + z * z / (4 * total * total)) ** 0.5)
+    lo = max(0.0, (center - margin) / denom)
+    hi = min(1.0, (center + margin) / denom)
+    return (lo, hi)
+
+
 def load_cases():
     out = []
     for d in sorted(p for p in CORPUS.iterdir() if (p / "case.json").is_file()):
@@ -144,17 +159,22 @@ def score(results=None):
     clean = [c for c in cases if c["kind"] == "clean"]
     table = {}
     print(f"  corpus: {len(authz)} authz-logic + {len(control)} control + {len(clean)} clean")
-    print(f"  {'scanner':12}{'authz-logic':>16}{'control':>14}{'false-pos':>12}")
+    print(f"  {'scanner':12}{'authz-logic':>16}{'95% CI':>14}{'control':>14}{'false-pos':>12}")
     for name in active():
         f = [r for r in results if r["scanner"] == name]
         det = lambda g: sum(any(r["case"] == c["name"] and r["file"] == c["vuln_file"] for r in f) for c in g)  # noqa: E731
         da, dc = det(authz), det(control)
         fp = sum(any(r["case"] == c["name"] for r in f) for c in clean)
+        a_lo, a_hi = wilson_ci(da, len(authz))
+        c_lo, c_hi = wilson_ci(dc, len(control))
         table[name] = {"detected": da, "authz_total": len(authz), "control_detected": dc,
-                       "control_total": len(control), "fp": fp, "clean_total": len(clean)}
+                       "control_total": len(control), "fp": fp, "clean_total": len(clean),
+                       "authz_ci95": [round(a_lo, 4), round(a_hi, 4)],
+                       "control_ci95": [round(c_lo, 4), round(c_hi, 4)]}
         ar = f"{da}/{len(authz)} = {da * 100 // max(len(authz), 1)}%"
+        ci = f"[{a_lo * 100:.0f}%,{a_hi * 100:.0f}%]"
         cr = f"{dc}/{len(control)} = {dc * 100 // max(len(control), 1)}%"
-        print(f"  {name:12}{ar:>16}{cr:>14}{str(fp) + '/' + str(len(clean)):>12}")
+        print(f"  {name:12}{ar:>16}{ci:>14}{cr:>14}{str(fp) + '/' + str(len(clean)):>12}")
     return table
 
 
