@@ -91,9 +91,13 @@ def semgrep_scan(case_dir, name="semgrep"):
     if not src.is_file():
         return []
     try:
-        # concrete public rule-packs (no token needed); `auto` loads nothing without a Semgrep account
+        # Concrete public rule-packs (no token needed); `auto` loads nothing without a Semgrep
+        # account. Keep this aligned with CORPUS_METHODOLOGY.md's anti-p-hacking commitment:
+        # run the fuller relevant registry packs before making any new headline claim.
         out = subprocess.run(["semgrep", "scan", "--sarif", "--quiet",
-                              "--config", "p/python", "--config", "p/secrets", str(src)],
+                              "--config", "p/python", "--config", "p/secrets",
+                              "--config", "p/owasp-top-ten", "--config", "p/security-audit",
+                              str(src)],
                              capture_output=True, text=True, timeout=300)
         return parse_sarif(json.loads(out.stdout or "{}"), case_dir.name, name)
     except Exception:

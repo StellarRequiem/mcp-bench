@@ -20,8 +20,8 @@ jobs:
         continue-on-error: true
         run: |
           semgrep --version
-          echo "--- semgrep p/python on the command-injection control (verbose) ---"
-          semgrep scan --config p/python corpus/command-injection/server.py; echo "exit=$?"
+          echo "--- semgrep fuller default packs on the command-injection control (verbose) ---"
+          semgrep scan --config p/python --config p/secrets --config p/owasp-top-ten --config p/security-audit corpus/command-injection/server.py; echo "exit=$?"
       - name: Run the benchmark (scanners execute in this ephemeral runner only)
         run: mcpbench | tee benchmark.txt
       - name: Upload results
