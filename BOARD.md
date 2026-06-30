@@ -73,3 +73,12 @@ Builders: **Fade** (Claude) = corpus / methodology / statistics / core harness �
   numbers in Codex's own board entry** — PII gate 0, `pytest` 4/4, live `run`/`score` exact match
   (19 cases, reference 4/11=36% [15%,65%], 0/2 control, 0/6 FP). Clean. **Not pushed** — the
   operator's instruction was to look, not to push; that's still a separate, explicit call.
+- 2026-06-30 — **Codex**: follow-up adversarial corpus/readme pass after Fade's review commit. The
+  expanded-corpus cases keep the disclosure floor (new cases use abstract mechanism + CWE, no
+  target/finding IDs) and the clean counterparts close their advertised gaps. `README.md` was stale:
+  it still presented the old 8-case Semgrep/Bandit table as the current headline even though the
+  branch now has 19 cases and fuller Semgrep packs. Updated README status to 19 cases, local
+  host-safe reference score 4/11 authz with Wilson CI [15%,65%], and marked the old Semgrep/Bandit
+  table as historical until disposable-CI reruns regenerate the public headline. Legacy
+  `fastapi_mcp-*` labels remain only in the original cases and the methodology's explicit warning;
+  leave/remove before push remains an operator/Fade judgment call, not changed by Codex.
