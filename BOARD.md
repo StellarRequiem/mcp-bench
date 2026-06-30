@@ -25,7 +25,7 @@ Builders: **Fade** (Claude) = corpus / methodology / statistics / core harness �
 
 | Agent | Lane | Current task | Files | Status |
 |-------|------|--------------|-------|--------|
-| Fade | corpus/methodology/stats | **PUSHED (operator: "lets proceed to push", 2026-06-30).** Reviewed Codex's `619bbde` (doc-only README/board pass, clean, independently re-verified) on top of the already-reviewed `cdd59ed`, then pushed all 8 unpushed commits to `origin/main` — confirmed fast-forward, no divergence, `origin/main` == local `HEAD` post-push. Repo is now public at the 19-case corpus state. Next: scanner-integration phase (#16: dlint/Pysa) is open for either agent; no corpus work currently queued. | `corpus/*`, `CORPUS_METHODOLOGY.md`, `mcpbench/__init__.py` (Wilson CI), `tests/test_pipeline.py` | 8 commits pushed this session (confirmed live): `cf66939` (Wilson 95% CI), `ad069a6`/`5240d39`/`9e13d62` (8 new authz-logic cases + 3 clean, in 3 batches — one honest correction reported, not hidden: `guard-divergence-across-paths` incidentally caught by the existing regex), `e9baa63` (board+contract), `cdd59ed` (Codex: Semgrep fuller packs), `364117f`/`5f7cbc0` (Fade review notes), `619bbde` (Codex: README/board sync). 19 cases total (11 authz-logic + 2 control + 6 clean), reference scanner 4/11 [15%,65%], 0/6 false positives. |
+| Fade | corpus/methodology/stats | **Headline verified + hardened, LOCAL ONLY (operator: "continue... accelerated pace", 2026-06-30).** Pulled the real CI scan artifact (run `28482069463`): semgrep+bandit now **0/11** authz-logic with fuller packs, vs the old 0/3. Ran a 4-way adversarial verification workflow before trusting that as a headline — clean, two honest caveats now disclosed (10 distinct classes not 11 independent trials; one missing clean counterpart). Added LICENSE (Apache-2.0, matched to pyproject.toml) + CITATION.cff. Commit `5068911` is local-only, **needs its own push go-ahead** — not assumed from the prior push. Next open: scanner-integration phase (#16: dlint/Pysa) for either agent; the missing `bola-client-supplied-owner-key` clean counterpart is a flagged future-work item, not in progress. | `corpus/*`, `CORPUS_METHODOLOGY.md`, `mcpbench/__init__.py` (Wilson CI), `tests/test_pipeline.py`, `LICENSE`, `CITATION.cff` | 9 commits total this session, 8 pushed + 1 local (`5068911`): `cf66939` (Wilson 95% CI), `ad069a6`/`5240d39`/`9e13d62` (8 new authz-logic cases + 3 clean), `e9baa63` (board+contract), `cdd59ed` (Codex: Semgrep fuller packs), `364117f`/`5f7cbc0` (Fade review notes), `619bbde` (Codex: README/board sync), `5068911` (Fade: real headline + adversarial verify + citability, **unpushed**). 19 cases / 10 distinct classes, reference 4/11 [15%,65%], semgrep+bandit 0/11 [0%,26%] (live CI), 0/6 and 1/6 false positives respectively. |
 | Codex | scanner integration / CI | **Semgrep full-pack baseline `cdd59ed` — REVIEWED by Fade, clean.** First pass stayed narrow: benchmark Semgrep now uses the methodology-promised registry packs (`p/python`, `p/secrets`, `p/owasp-top-ten`, `p/security-audit`) before adding a new scanner, and the CI diagnostic mirrors that exact command. Next candidate: `dlint` integration. | `mcpbench/__init__.py`, `.github/workflows/scan.yml`, `BOARD.md` | **Fade independently re-ran everything rather than trust the claimed numbers** — exact match: PII gate 0, `pytest` 4/4, live `mcpbench run`/`score` = 19 cases, reference 4/11=36% `[15%,65%]`, 0/2 control, 0/6 FP. Purity confirmed: purely additive config inside the already-`semgrep_available()`-gated path, no new local-execution surface; semgrep itself never ran on the host (only `reference` was active locally, as designed). Stayed inside the proposed lane, didn't touch Fade's files. **STILL NOT PUSHED** — operator said "give codex a pass," not "push"; standing by for the explicit push call. |
 
 ## File ownership / locks (quick reference — see AGENTS.md §"Layer split" for the full rationale)
@@ -92,3 +92,22 @@ Builders: **Fade** (Claude) = corpus / methodology / statistics / core harness �
   upstream divergence (`git log HEAD..origin/main` empty, clean fast-forward). **Pushed** —
   `git push origin main`, `72e62d4..619bbde`, confirmed `origin/main` == local `HEAD` post-push.
   Live: https://github.com/StellarRequiem/mcp-bench. Corpus is now 8→19 cases, public.
+- 2026-06-30 — **Fade**: operator said "continue... accelerated pace." CI on the `619bbde` push had
+  already completed (`ci` + `scan`, both green) — pulled the live `scan` artifact (run `28482069463`)
+  rather than write speculative numbers: semgrep + bandit (fuller registry packs) score **0/11**
+  authz-logic on the expanded corpus, a stronger result than the old 0/3. Before publishing that as
+  the headline, ran a 4-way adversarial verification workflow (one reviewer per case bundle,
+  explicitly briefed to find reasons the 0/11 claim might be weaker than it looks) — no disqualifying
+  issues; every vulnerable case maps to a recognizable real bug class, every clean case genuinely
+  closes its gap, one reviewer independently re-pulled the same CI artifact and got an identical
+  result. Two honest caveats surfaced and are now disclosed in `CORPUS_METHODOLOGY.md`: (1) 11 cases
+  span 10 distinct root-cause classes, not 11 independent trials (`unencoded-query-param-traversal`
+  correlates with `op-filter-bypass`); (2) `bola-client-supplied-owner-key` has no clean counterpart
+  yet. Fixed a cosmetic `vuln_line` pointer on `bola-missing-owner-filter` (comment line → actual
+  predicate line; metadata-only, doesn't touch scoring, not a post-hoc rewrite). Also added
+  `LICENSE` (Apache-2.0, matching the pre-existing `pyproject.toml` declaration — caught and fixed a
+  near-miss where I'd first drafted MIT) and `CITATION.cff`. Re-verified: PII gate 0, `pytest` 4/4,
+  live local `run`/`score` unchanged (4/11 reference, file-level scoring confirmed unaffected by the
+  vuln_line fix). Committed `5068911`, pseudonym identity, **local only — held pending the operator's
+  next explicit push go-ahead**, per AGENTS.md §5 (every push is its own decision, not inferred from
+  momentum).
