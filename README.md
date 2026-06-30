@@ -24,21 +24,35 @@ mcpbench            # run every registered scanner over the corpus, then score
 ```
 
 ## Status
-**Expanded corpus — 19 labeled cases:** 11 authorization-logic cases (generalized from real,
-responsibly-confirmed findings under the disclosure rules in `CORPUS_METHODOLOGY.md`) · 2 control
-bugs a source scanner *should* catch (hardcoded secret, command injection) · 6 clean negatives for
-false-positive measurement.
+**Expanded corpus — 19 labeled cases:** 11 authorization-logic cases across **10 distinct root-cause
+classes** (generalized from real, responsibly-confirmed findings under the disclosure rules in
+`CORPUS_METHODOLOGY.md`; two cases share a root cause as a deliberate AST-generalization test, see the
+methodology doc) · 2 control bugs a source scanner *should* catch (hardcoded secret, command
+injection) · 6 clean negatives for false-positive measurement.
 
-The local, host-safe sanity check currently runs only the built-in reference detector:
+**Headline result** — semgrep (fuller registry packs: `p/python`, `p/secrets`, `p/owasp-top-ten`,
+`p/security-audit`) and bandit, run in the disposable GitHub Actions sandbox against the full expanded
+corpus ([live run](https://github.com/StellarRequiem/mcp-bench/actions/runs/28482069463), commit
+`619bbde`):
 
 | scanner | authz-logic | 95% CI | control | false-pos |
 |---|---:|---:|---:|---:|
+| **semgrep** (general SAST) | **0/11 (0%)** | [0%, 26%] | 2/2 (100%) | 0/6 |
+| **bandit** (general SAST) | **0/11 (0%)** | [0%, 26%] | 2/2 (100%) | 1/6 |
 | reference (our authz-logic detector) | 4/11 (36%) | [15%, 65%] | 0/2 (n/a — specialist) | 0/6 |
 
-The general-SAST headline for semgrep and bandit must be regenerated in the disposable GitHub
-Actions runner before publication. In particular, semgrep is now configured to run the fuller
-methodology-promised registry packs (`p/python`, `p/secrets`, `p/owasp-top-ten`,
-`p/security-audit`), so the older 8-case numbers below are historical only, not the current headline.
+> **Two independent mature general-purpose SASTs, run with their fuller default rule packs, still miss
+> every authorization-logic case (0/11) while correctly catching both control bugs (2/2) and staying
+> nearly false-positive-free (≤1/6)** — the control hit rate proves the tools are actually running, so
+> the authz-logic miss is a real capability gap, not a setup artifact. This result was adversarially
+> re-reviewed case-by-case before publication (see "Adversarial verification" in
+> `CORPUS_METHODOLOGY.md`) — every vulnerable case maps to a recognizable real bug class a careful human
+> reviewer would plausibly catch, and the headline number was independently re-derived from the raw CI
+> artifact rather than trusted from a summary. One honest caveat: of the 11 cases, 2 share a root cause
+> (an AST-shape generalization test, not a new class), so the *effective* class-level result is 0/10,
+> not 11 fully independent trials — disclosed, not hidden, in the methodology doc. (bandit's 1 false
+> positive — a `B105` string-heuristic flagging an OAuth `"none"` value near a token-named key in a
+> *clean* case — is the same known cause as the original v1 corpus; reported, not omitted.)
 
 ## Historical v1 Baseline
 **v1 corpus — 8 labeled cases:** 3 authorization-logic (all real, responsibly-confirmed finds:
@@ -65,3 +79,16 @@ negatives.
 — the GitHub Actions ephemeral runner (`.github/workflows/scan.yml`), never a developer host.** Local
 runs + the test suite are host-safe (the reference detector is our own code; semgrep runs only where
 installed, i.e. in CI).
+
+## Methodology
+
+The scoring rule, abstraction rule, disclosure floor, and anti-p-hacking commitments are pre-registered
+in [`CORPUS_METHODOLOGY.md`](./CORPUS_METHODOLOGY.md) — locked before any new scanner is scored against
+an expanded corpus, so the headline can't be tuned after the fact. Every detection-rate figure above
+carries a 95% Wilson confidence interval, not a bare percentage, because a small-N rate alone overstates
+precision.
+
+## License & Citation
+
+Apache License 2.0 — see [`LICENSE`](./LICENSE). If you use mcp-bench, see
+[`CITATION.cff`](./CITATION.cff) for citation metadata.

@@ -4,7 +4,7 @@
   "class": "bola-missing-owner-filter",
   "severity": "high",
   "vuln_file": "server.py",
-  "vuln_line": 20,
+  "vuln_line": 22,
   "why": "get_run has no user_id predicate while the sibling get_session does -- any authenticated caller reads any other user's row by enumerable id (broken object-level authorization, CWE-639). Generalized from a real, responsibly-confirmed finding -- no target named, no implementation details reused.",
   "source": "generalized from a real responsibly-confirmed finding"
 }

@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use mcp-bench in your research or tooling evaluation, please cite it as below."
+title: "mcp-bench: an authorization-logic detection benchmark for MCP security scanners"
+type: software
+authors:
+  - name: "StellarRequiem"
+repository-code: "https://github.com/StellarRequiem/mcp-bench"
+license: Apache-2.0
+date-released: 2026-06-30
+abstract: >
+  An independent, reproducible benchmark measuring whether MCP security scanners
+  detect authorization-logic vulnerabilities (broken object-level auth, mass
+  assignment, confused deputy, scope elevation) versus only generic/syntactic
+  classes. Labeled corpus, pre-registered scoring methodology, and Wilson
+  95% confidence intervals on every detection-rate figure.

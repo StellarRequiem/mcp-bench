@@ -50,7 +50,7 @@ class," reported as such, not silently inflated to 100% by hand-fitting a regex 
 | authz-logic | bola-missing-owner-filter | not yet |
 | authz-logic | bola-client-supplied-owner-key | not yet |
 | authz-logic | mass-assignment-upsert-takeover | not yet |
-| authz-logic | unencoded-interpolation-traversal | not yet (a generalization test, not a new class for the reference detector) |
+| authz-logic | unencoded-interpolation-traversal | not yet (a generalization test, not a new class for the reference detector) -- **statistically correlated with `operation-filter-bypass`, see note below, not an independent trial** |
 | authz-logic | guard-divergence-across-paths | yes, incidentally -- see note below the table |
 | authz-logic | list-call-surface-divergence | not yet |
 | authz-logic | permissive-default-role | not yet |
@@ -71,6 +71,43 @@ anti-p-hacking commitments below).
 | control | hardcoded-secret | n/a (control, not authz-logic) |
 | control | command-injection | n/a |
 | clean | clean-filter / clean-dcr / clean-url-builder / clean-bola-owner / clean-mass-assignment / clean-list-call-divergence | n/a |
+
+## Adversarial verification (2026-06-30)
+
+Before the expanded-corpus headline shipped publicly, every new authz-logic and clean case was
+independently re-reviewed by a fresh pass (4 parallel reviewers, one per case bundle, none of which
+authored the cases) with an explicit brief to find reasons the eventual scanner-miss headline might be
+weaker than it looks -- not to confirm it. Full findings are in the session record; the load-bearing
+results:
+
+- **No case was found to be uncatchable trivia, mislabeled, or a contrived non-bug.** Every vulnerable
+  case maps to a recognizable real-world class (BOLA/CWE-639, mass assignment/CWE-915, path
+  traversal/CWE-22, incomplete mediation/CWE-862, confused deputy/CWE-441, insecure default/CWE-1188,
+  advertised-vs-dispatchable divergence/CWE-285) that a careful human reviewer would plausibly catch on
+  inspection. `tool-list-call-divergence` and its clean counterpart were verified by direct code
+  execution, not just by reading -- the bug and the fix both behave exactly as claimed.
+- **Every clean case checked genuinely closes its paired gap** (symmetric owner-scoping, a real
+  positive field allowlist, an unconditional prune) rather than superficially resembling a fix.
+- **The 0/11 figure was independently re-derived from the live CI artifact** (GitHub Actions run
+  `28482069463`, not the README's own prior claim) and confirmed to be zero findings of *any* class on
+  all 11 authz-logic files -- ruling out a scoring-rule miscount -- while both control bugs were
+  correctly caught and the one known bandit false positive (clean-dcr, `B105`) reproduced exactly.
+- **Two honest limitations surfaced, neither disqualifying, both disclosed rather than hidden:**
+  1. `unencoded-query-param-traversal` shares its root cause with the pre-existing `op-filter-bypass`
+     case (same exploit shape, only the interpolation syntax differs) -- a scanner missing one will
+     essentially always miss the other, so they are not independent draws. The corpus is therefore
+     **11 cases across 10 distinct root-cause classes**, not 11 independent ones; a maximally rigorous
+     reading of the Wilson CI should account for that correlation rather than treat n=11 as fully
+     independent trials.
+  2. `bola-client-supplied-owner-key` (the spoofable-parameter BOLA variant) has no paired clean case
+     in the corpus, so its false-positive behavior is untested -- same disclosed-gap situation as
+     `scope-elevation-via-default-role` and `confused-deputy-forwarded-credential`, which were always
+     documented (commit `9e13d62`) as 3-of-8 deliberately paired, not an oversight.
+- **Cosmetic-only fix applied as a result of this pass:** `bola-missing-owner-filter/case.json`'s
+  `vuln_line` previously pointed at the explanatory `# VULN` comment (line 20) rather than the actual
+  unscoped predicate (line 22). Corrected for precision. This does not change scoring (file-level, not
+  line-level, per the rule above) or which case is vulnerable -- it is a metadata-accuracy fix, not a
+  rewrite made after seeing a scanner result, so it does not violate the anti-p-hacking commitment below.
 
 ## Anti-p-hacking commitments
 
