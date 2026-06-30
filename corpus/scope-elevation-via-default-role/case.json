@@ -1,0 +1,10 @@
+{
+  "id": "scope-elevation-via-default-role",
+  "kind": "authz-logic",
+  "class": "permissive-default-role",
+  "severity": "high",
+  "vuln_file": "server.py",
+  "vuln_line": 11,
+  "why": "Omitting the 'role' field from the request silently defaults to 'admin' rather than a safe/unprivileged value, so any caller who simply leaves the field out is treated as fully privileged (CWE-862 / CWE-1188, insecure default). A different code idiom than the corpus's existing empty-filter-bypass (a dict.get default, not a falsy-collection-or fallback). Generalized from a real, responsibly-confirmed finding -- no target named.",
+  "source": "generalized from a real responsibly-confirmed finding"
+}

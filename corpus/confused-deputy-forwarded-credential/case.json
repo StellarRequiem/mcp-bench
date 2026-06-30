@@ -1,0 +1,10 @@
+{
+  "id": "confused-deputy-forwarded-credential",
+  "kind": "authz-logic",
+  "class": "confused-deputy-forwarded-credential",
+  "severity": "high",
+  "vuln_file": "server.py",
+  "vuln_line": 15,
+  "why": "The proxy validates that the target host is a KNOWN internal host, but never checks it against the specific caller's own permission scope before forwarding the caller's authorization header -- the proxy's elevated trust is exercised on the caller's behalf with no per-caller destination check (confused deputy, CWE-441). Generalized from a real, responsibly-confirmed finding -- no target named.",
+  "source": "generalized from a real responsibly-confirmed finding"
+}

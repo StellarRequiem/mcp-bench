@@ -53,6 +53,8 @@ class," reported as such, not silently inflated to 100% by hand-fitting a regex 
 | authz-logic | unencoded-interpolation-traversal | not yet (a generalization test, not a new class for the reference detector) |
 | authz-logic | guard-divergence-across-paths | yes, incidentally -- see note below the table |
 | authz-logic | list-call-surface-divergence | not yet |
+| authz-logic | permissive-default-role | not yet |
+| authz-logic | confused-deputy-forwarded-credential | not yet |
 
 **Note on `guard-divergence-across-paths`:** this table originally predicted "not yet" before the
 first live run. The actual run shows the naive `operation-filter-bypass` regex (an unparameterized
