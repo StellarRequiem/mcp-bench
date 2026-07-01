@@ -8,6 +8,7 @@ is actually available on the machine (`semgrep` runs where semgrep is installed 
 local test suite stays host-safe.
 """
 import argparse
+import importlib.util
 import json
 import re
 import shutil
@@ -130,6 +131,35 @@ def bandit_scan(case_dir, name="bandit"):
         return []
 
 
+# ----- dlint: Flake8 security plugin; runs only where installed (CI) -----
+def parse_dlint(output, case_name, scanner):
+    """Pure Flake8/Dlint text -> normalized findings. Testable without running the scanner."""
+    out = []
+    for line in output.splitlines():
+        m = re.match(r"^(.*?):(\d+):(\d+):\s+(DUO\d+)\s+(.+)$", line)
+        if m:
+            filename, line_number, _column, rule_id, _message = m.groups()
+            out.append({"scanner": scanner, "case": case_name, "cls": rule_id,
+                        "file": Path(filename).name, "line": int(line_number)})
+    return out
+
+
+def dlint_available():
+    return shutil.which("flake8") is not None and importlib.util.find_spec("dlint") is not None
+
+
+def dlint_scan(case_dir, name="dlint"):
+    src = case_dir / "server.py"
+    if not src.is_file():
+        return []
+    try:
+        out = subprocess.run(["flake8", "--select=DUO", str(src)],
+                             capture_output=True, text=True, timeout=300)
+        return parse_dlint((out.stdout or "") + (out.stderr or ""), case_dir.name, name)
+    except Exception:
+        return []
+
+
 # NOTE on CodeQL (attempted 2026-06-10, reverted): CodeQL runs cleanly here (verified: 174 queries
 # evaluated, results interpreted) but finds NOTHING on this corpus — its default security suite targets
 # REMOTE (network) taint sources, while our minimal controls use a LOCAL source (sys.argv) + a syntactic
@@ -140,6 +170,7 @@ SCANNERS = {
     "reference": (reference_available, reference_scan),
     "semgrep": (semgrep_available, semgrep_scan),
     "bandit": (bandit_available, bandit_scan),
+    "dlint": (dlint_available, dlint_scan),
 }
 
 

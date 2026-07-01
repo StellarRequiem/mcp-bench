@@ -14,14 +14,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install mcp-bench + scanner subjects (semgrep, bandit)
-        run: pip install -e . semgrep bandit
-      - name: Diagnose — does semgrep detect the obvious control bug in this runner?
+      - name: Install mcp-bench + scanner subjects (semgrep, bandit, dlint)
+        run: pip install -e . semgrep bandit flake8 dlint
+      - name: Diagnose — do scanners detect the obvious control bug in this runner?
         continue-on-error: true
         run: |
           semgrep --version
           echo "--- semgrep fuller default packs on the command-injection control (verbose) ---"
           semgrep scan --config p/python --config p/secrets --config p/owasp-top-ten --config p/security-audit corpus/command-injection/server.py; echo "exit=$?"
+          flake8 --version
+          echo "--- dlint on the command-injection control (verbose) ---"
+          flake8 --select=DUO corpus/command-injection/server.py; echo "exit=$?"
       - name: Run the benchmark (scanners execute in this ephemeral runner only)
         run: mcpbench | tee benchmark.txt
       - name: Upload results
