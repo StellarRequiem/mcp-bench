@@ -1,0 +1,10 @@
+{
+  "id": "clean-resource-required",
+  "kind": "clean",
+  "class": "missing-resource-indicator",
+  "severity": "none",
+  "vuln_file": null,
+  "vuln_line": null,
+  "why": "Clean counterpart: missing or wrong resource indicators are rejected before token issuance and the token audience is rechecked before tool access.",
+  "source": "clean negative generated for false-positive measurement"
+}

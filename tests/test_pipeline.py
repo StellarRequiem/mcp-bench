@@ -38,8 +38,11 @@ def test_expanded_corpus_structure():
     cases = {c["id"]: c for c in load_cases()}
     new_authz = ["bola-missing-owner-filter", "bola-client-supplied-owner-key", "mass-assignment-upsert-takeover",
                  "unencoded-query-param-traversal", "version-pinned-authz-divergence", "tool-list-call-divergence",
-                 "scope-elevation-via-default-role", "confused-deputy-forwarded-credential"]
-    new_clean = ["clean-bola-owner", "clean-mass-assignment", "clean-list-call-divergence"]
+                 "scope-elevation-via-default-role", "confused-deputy-forwarded-credential",
+                 "resource-missing-accepted", "foreign-audience-token-accepted",
+                 "resource-prefix-canonicalization-bypass"]
+    new_clean = ["clean-bola-owner", "clean-mass-assignment", "clean-list-call-divergence",
+                 "clean-resource-required", "clean-audience-validation", "clean-resource-canonicalization"]
     for cid in new_authz:
         assert cases[cid]["kind"] == "authz-logic"
         assert cases[cid]["vuln_file"] == "server.py"

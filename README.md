@@ -24,7 +24,16 @@ mcpbench            # run every registered scanner over the corpus, then score
 ```
 
 ## Status
-**Expanded corpus — 19 labeled cases:** 11 authorization-logic cases across **10 distinct root-cause
+
+**Local vNext branch — 25 labeled cases:** 14 authorization-logic cases plus 2 control bugs and 9
+clean negatives. The 2026-07-08 vNext slice adds three MCP resource/audience-boundary classes
+(`missing-resource-indicator`, `foreign-audience-token-accepted`,
+`resource-prefix-canonicalization-bypass`) with clean counterparts. These new cases have passed the
+host-safe local gate (`pytest` 4/4; reference-only `mcpbench run`/`score`: 4/14 authz, 0/2 control,
+0/9 false positives) but have **not yet been scored by disposable-CI Semgrep/Bandit/Dlint**, so they
+do not change the CI-verified public scanner headline below.
+
+**Last CI-verified expanded-corpus headline — 19 labeled cases:** 11 authorization-logic cases across **10 distinct root-cause
 classes** (generalized from real, responsibly-confirmed findings under the disclosure rules in
 `CORPUS_METHODOLOGY.md`; two cases share a root cause as a deliberate AST-generalization test, see the
 methodology doc) · 2 control bugs a source scanner *should* catch (hardcoded secret, command
@@ -41,7 +50,7 @@ corpus ([live run](https://github.com/StellarRequiem/mcp-bench/actions/runs/2848
 | **bandit** (general SAST) | **0/11 (0%)** | [0%, 26%] | 2/2 (100%) | 1/6 |
 | reference (our authz-logic detector) | 4/11 (36%) | [15%, 65%] | 0/2 (n/a — specialist) | 0/6 |
 
-> **Two independent mature general-purpose SASTs, run with their fuller default rule packs, still miss
+> **Last CI-verified 19-case result:** two independent mature general-purpose SASTs, run with their fuller default rule packs, still miss
 > every authorization-logic case (0/11) while correctly catching both control bugs (2/2) and staying
 > nearly false-positive-free (≤1/6)** — the control hit rate proves the tools are actually running, so
 > the authz-logic miss is a real capability gap, not a setup artifact. This result was adversarially

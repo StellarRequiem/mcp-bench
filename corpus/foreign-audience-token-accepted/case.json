@@ -1,0 +1,10 @@
+{
+  "id": "foreign-audience-token-accepted",
+  "kind": "authz-logic",
+  "class": "foreign-audience-token-accepted",
+  "severity": "high",
+  "vuln_file": "server.py",
+  "vuln_line": 14,
+  "why": "The resource server checks issuer and scope but never verifies that the access token audience/resource identifies this MCP server, allowing a token minted for another resource to authorize a tool call (CWE-863). Generalized from the official MCP audience/resource validation requirement -- no target named.",
+  "source": "generalized MCP authorization-boundary fixture"
+}

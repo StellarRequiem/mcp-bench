@@ -1,0 +1,10 @@
+{
+  "id": "resource-missing-accepted",
+  "kind": "authz-logic",
+  "class": "missing-resource-indicator",
+  "severity": "high",
+  "vuln_file": "server.py",
+  "vuln_line": 12,
+  "why": "The token issuer rejects an explicitly wrong resource but accepts a missing resource and converts it to a wildcard audience, so callers can receive a token that is not bound to the intended MCP resource (CWE-862 / CWE-863). Generalized from the official MCP resource-indicator requirement -- no target named.",
+  "source": "generalized MCP authorization-boundary fixture"
+}

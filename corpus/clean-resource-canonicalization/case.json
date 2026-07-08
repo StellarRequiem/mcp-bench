@@ -1,0 +1,10 @@
+{
+  "id": "clean-resource-canonicalization",
+  "kind": "clean",
+  "class": "resource-prefix-canonicalization-bypass",
+  "severity": "none",
+  "vuln_file": null,
+  "vuln_line": null,
+  "why": "Clean counterpart: canonicalization rejects fragments, normalizes scheme/host, and compares the complete resource URI exactly instead of by prefix.",
+  "source": "clean negative generated for false-positive measurement"
+}

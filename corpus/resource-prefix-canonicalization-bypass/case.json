@@ -1,0 +1,10 @@
+{
+  "id": "resource-prefix-canonicalization-bypass",
+  "kind": "authz-logic",
+  "class": "resource-prefix-canonicalization-bypass",
+  "severity": "high",
+  "vuln_file": "server.py",
+  "vuln_line": 14,
+  "why": "The resource check normalizes the URI and then uses prefix matching, so a sibling resource such as '/mcp-admin' can be treated as the intended MCP server resource (CWE-863). Generalized from MCP canonical resource-boundary guidance -- no target named.",
+  "source": "generalized MCP authorization-boundary fixture"
+}

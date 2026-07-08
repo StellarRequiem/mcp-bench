@@ -55,6 +55,9 @@ class," reported as such, not silently inflated to 100% by hand-fitting a regex 
 | authz-logic | list-call-surface-divergence | not yet |
 | authz-logic | permissive-default-role | not yet |
 | authz-logic | confused-deputy-forwarded-credential | not yet |
+| authz-logic | missing-resource-indicator | not yet |
+| authz-logic | foreign-audience-token-accepted | not yet |
+| authz-logic | resource-prefix-canonicalization-bypass | not yet |
 
 **Note on `guard-divergence-across-paths`:** this table originally predicted "not yet" before the
 first live run. The actual run shows the naive `operation-filter-bypass` regex (an unparameterized
@@ -70,7 +73,27 @@ than fixed by editing the case (the case was not touched after this result was o
 anti-p-hacking commitments below).
 | control | hardcoded-secret | n/a (control, not authz-logic) |
 | control | command-injection | n/a |
-| clean | clean-filter / clean-dcr / clean-url-builder / clean-bola-owner / clean-mass-assignment / clean-list-call-divergence | n/a |
+| clean | clean-filter / clean-dcr / clean-url-builder / clean-bola-owner / clean-mass-assignment / clean-list-call-divergence / clean-resource-required / clean-audience-validation / clean-resource-canonicalization | n/a |
+
+## vNext resource/audience additions (2026-07-08)
+
+The 2026-07-08 vNext slice adds three MCP resource/audience-boundary classes and one clean counterpart
+for each:
+
+- `resource-missing-accepted` / `clean-resource-required`
+- `foreign-audience-token-accepted` / `clean-audience-validation`
+- `resource-prefix-canonicalization-bypass` / `clean-resource-canonicalization`
+
+These are generalized from official MCP authorization/resource-boundary guidance, not from a named
+private target. They intentionally do **not** extend `reference_scan`; tuning the reference detector to
+new exact fixtures would be circular. The local host-safe gate after adding them was:
+
+- `pytest`: 4/4
+- `mcpbench run`: 1 scanner `[reference]` x 25 cases -> 5 findings
+- `mcpbench score`: reference 4/14 authz-logic [12%,55%], 0/2 control, 0/9 false positives
+
+Semgrep, Bandit, and Dlint results for the expanded 25-case branch remain pending a disposable GitHub
+Actions runner. Do not reuse the older 19-case CI headline as a 25-case result.
 
 ## Adversarial verification (2026-06-30)
 

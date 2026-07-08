@@ -1,0 +1,10 @@
+{
+  "id": "clean-audience-validation",
+  "kind": "clean",
+  "class": "foreign-audience-token-accepted",
+  "severity": "none",
+  "vuln_file": null,
+  "vuln_line": null,
+  "why": "Clean counterpart: issuer, audience/resource, and scope are all checked before authorizing the tool call.",
+  "source": "clean negative generated for false-positive measurement"
+}
